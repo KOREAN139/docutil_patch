@@ -1,0 +1,23 @@
+<korean139@gmail.com>
+
+diff --git a/docutils/docutils/nodes.py b/docutils/docutils/nodes.py
+index 8e3b1e2..d6969c1 100644
+--- a/docutils/docutils/nodes.py
++++ b/docutils/docutils/nodes.py
+@@ -2130,10 +2130,16 @@ def make_id(string):
+         id = id.decode()
+     id = id.translate(_non_id_translate_digraphs)
+     id = id.translate(_non_id_translate)
++    # copy id for the case when there is no ascii character in id
++    unionly_id = (id + '.')[:-1]
+     # get rid of non-ascii characters.
+     # 'ascii' lowercase to prevent problems with turkish locale.
+     id = unicodedata.normalize('NFKD', id).\
+          encode('ascii', 'ignore').decode('ascii')
++    # if id has no ascii-characters, convert each unicode-byte to string
++    # ex) 0x00f8 (o with stroke) to 'u00f8'
++    if not id:
++        id = "".join(map(lambda x: hex(ord(x)), unionly_id)).replace('0x', 'u')
+     # shrink runs of whitespace and replace by hyphen
+     id = _non_id_chars.sub('-', ' '.join(id.split()))
+     id = _non_id_at_ends.sub('', id)
